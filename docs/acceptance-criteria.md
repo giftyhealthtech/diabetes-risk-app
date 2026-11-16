@@ -13,7 +13,9 @@ The MVP is complete only when all of the following are satisfied:
 - [ ] The backend successfully communicates with the deployed diabetes-risk prediction API.
 - [ ] The prediction result is displayed to the user correctly.
 - [ ] Prediction API failures are handled gracefully.
-- [ ] Prometheus exposes the required backend metrics.
+- [ ] Prometheus exposes bounded HTTP and prediction API request counts and durations at `/metrics`.
+- [ ] Backend request logs are structured JSON with trace IDs and do not contain submitted health information.
+- [ ] OpenTelemetry traces cover FastAPI requests and outbound prediction API calls and can be exported through OTLP/HTTP.
 - [ ] Grafana dashboards display the correct monitoring views.
 - [ ] Alert rules can detect service degradation and availability issues.
 - [ ] The responder agent summarizes an alert with operational impact and next steps.

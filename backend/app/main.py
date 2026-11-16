@@ -2,15 +2,30 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import settings
+from .observability import (
+    RequestObservabilityMiddleware,
+    add_metrics_endpoint,
+    configure_logging,
+    instrument_app,
+)
 from .schemas import PredictionInput
 from .services.prediction_service import PredictionAPIError, get_prediction
+
+configure_logging()
 
 app = FastAPI(
     title=settings.app_name,
     version=settings.app_version,
     description="Diabetes Risk App backend foundation.",
+    telemetry={
+        "tracing": False,
+        "metrics": False,
+        "logs": False,
+        "operation_spans": False,
+    },
 )
 
+app.add_middleware(RequestObservabilityMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins,
@@ -18,6 +33,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+add_metrics_endpoint(app)
+instrument_app(app)
 
 
 @app.get("/health")

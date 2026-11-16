@@ -109,9 +109,10 @@ The project retains the existing 12 GitHub issues and updates them rather than c
 - Verify local readiness.
 
 ### Milestone 5 — Observability
-- Add Prometheus metrics.
-- Add OpenTelemetry traces.
-- Add structured JSON logging with trace IDs.
+- Expose bounded Prometheus HTTP and prediction API request/duration metrics.
+- Instrument FastAPI and outbound HTTPX requests with OpenTelemetry; export spans through an optional OTLP/HTTP collector endpoint.
+- Emit JSON request logs with trace IDs and route/status/timing fields, without request data or health inputs.
+- Disable FastAPI's built-in telemetry in favor of privacy-safe request spans that omit query strings and payloads.
 - Add Grafana dashboards.
 
 ### Milestone 6 — Alerting and responder flow

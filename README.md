@@ -21,6 +21,14 @@ Stop the services with:
 docker compose down
 ```
 
+## Observability
+
+The backend exposes Prometheus metrics at `http://localhost:8000/metrics`, including bounded HTTP request counts/durations and upstream prediction API counts/durations. Metrics do not include request bodies or user-provided health values.
+
+Backend application and Uvicorn logs are JSON lines with timestamps and trace/span IDs when a trace is active. Request log fields are limited to method, registered route template, status code, and duration; request bodies, query strings, and headers are not logged.
+
+Incoming requests and outbound HTTPX calls are instrumented with OpenTelemetry. Trace context is accepted and propagated using W3C `traceparent`/`tracestate`; spans intentionally omit request URLs, query strings, headers, and bodies. To export traces to an OTLP/HTTP collector, set `OTEL_EXPORTER_OTLP_ENDPOINT` in `.env` to the collector's base URL (for example `http://localhost:4318`) before starting Compose. The exporter sends traces to `/v1/traces`; the app creates trace IDs locally even when no collector endpoint is configured, but traces will not be available in a tracing UI until an exporter/collector is configured. For Render, configure the same variable in the backend service's environment settings. Do not put credentials in the endpoint URL; use the standard `OTEL_EXPORTER_OTLP_HEADERS` environment variable for collector authentication where required.
+
 ## Public deployment on Render
 
 The root [`render.yaml`](render.yaml) Blueprint defines a React Static Site and a Docker-based FastAPI Web Service. The current public URLs are:

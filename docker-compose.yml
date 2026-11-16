@@ -12,6 +12,8 @@ services:
       MODEL_API_URL: ${MODEL_API_URL:-https://diabetes-risk-prediction-tmkn.onrender.com}
       MODEL_API_TIMEOUT: ${MODEL_API_TIMEOUT:-10.0}
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000,http://127.0.0.1:3000}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+      OTEL_EXPORTER_OTLP_HEADERS: ${OTEL_EXPORTER_OTLP_HEADERS:-}
     ports:
       - "${BACKEND_PORT:-8000}:8000"
     healthcheck:
