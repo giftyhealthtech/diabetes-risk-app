@@ -19,7 +19,7 @@ services:
       - key: MODEL_API_TIMEOUT
         value: "10.0"
       - key: CORS_ORIGINS
-        value: https://diabetes-risk-app-web.onrender.com
+        value: https://diabetes-risk-app-z8ke.onrender.com
 
   - type: web
     name: diabetes-risk-app-web
