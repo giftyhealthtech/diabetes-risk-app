@@ -40,6 +40,14 @@ The Blueprint configures the frontend API URL and backend CORS origin to match t
 
 Render's official setup guides: [Blueprints](https://render.com/docs/infrastructure-as-code), [static sites](https://render.com/docs/static-sites), and [Docker web services](https://render.com/docs/docker).
 
+## CI/CD
+
+The GitHub Actions workflow at `.github/workflows/ci.yml` runs for pull requests targeting `main` and pushes to `main`. It runs the backend tests, frontend lint/tests/build, and builds both Docker images. It does not publish images or deploy pull requests.
+
+Both services in `render.yaml` use `autoDeployTrigger: checksPass`, so Render deploys a commit on its linked `main` branch only after the commit's CI checks pass. If either Render service was created manually rather than from the Blueprint, set **Settings → Auto-Deploy → After CI Checks Pass** for both services in the Render Dashboard. This setting is required for manually created services; editing `render.yaml` alone does not update their settings.
+
+Protect `main` in GitHub by requiring pull requests, the **Backend tests**, **Frontend checks**, and **Container builds** checks, and the project's required review approval before merging. This ensures approved changes are merged only after CI passes; Render then performs the production deployment automatically. No Render deploy-hook credentials are needed.
+
 ## Run services without Docker
 
 See [frontend/README.md](frontend/README.md) for frontend setup. Start the backend with `uv run uvicorn backend.app.main:app --reload --port 8000`.

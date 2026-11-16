@@ -120,9 +120,9 @@ The project retains the existing 12 GitHub issues and updates them rather than c
 - Verify incident handling procedure.
 
 ### Milestone 7 — CI/CD and deployment readiness
-- Add GitHub Actions validation.
-- Add manual approval gate for deployment.
-- Verify deployment health checks.
+- Run backend, frontend, and container checks with GitHub Actions on pull requests to `main`.
+- Require review approval and passing checks before merging to `main`.
+- Configure Render to deploy only after CI checks pass, then verify backend health.
 
 ### Milestone 8 — Final documentation and release sign-off
 - Confirm the architecture and all acceptance criteria before implementation approval.

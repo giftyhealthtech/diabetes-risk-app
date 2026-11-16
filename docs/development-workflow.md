@@ -25,12 +25,12 @@ Use pull requests for merging changes.
 
 ## Deployment Workflow
 
-1. Pull requests trigger CI.
-2. CI runs linting and automated tests.
-3. Approved changes merge into develop.
-4. Successful CI deploys to the development environment.
-5. Production deployment requires a manual approval.
-6. Deployment health checks verify the release.
+1. Pull requests targeting `main` run backend tests, frontend lint/tests/build, and Docker image builds through GitHub Actions.
+2. Protect `main` with required CI checks and review approval; only approved, passing changes may merge.
+3. Render deploys changes from its linked `main` branch after all CI checks pass.
+4. The backend `/health` endpoint verifies backend service health after deployment.
+
+The Render Blueprint uses `autoDeployTrigger: checksPass`. For services created manually, set **After CI Checks Pass** under **Settings → Auto-Deploy** in the Render Dashboard. Changes to the Blueprint do not automatically update manually managed service settings.
 
 ## On-Call Workflow
 

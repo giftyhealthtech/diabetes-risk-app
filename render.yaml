@@ -6,7 +6,7 @@ services:
     dockerfilePath: ./backend/Dockerfile
     dockerContext: .
     healthCheckPath: /health
-    autoDeployTrigger: commit
+    autoDeployTrigger: checksPass
     envVars:
       - key: APP_NAME
         value: diabetes-risk-app
@@ -27,7 +27,7 @@ services:
     rootDir: frontend
     buildCommand: npm ci && npm run build
     staticPublishPath: dist
-    autoDeployTrigger: commit
+    autoDeployTrigger: checksPass
     envVars:
       - key: VITE_API_BASE_URL
         value: https://diabetes-risk-app-api.onrender.com

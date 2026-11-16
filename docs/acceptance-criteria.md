@@ -19,7 +19,7 @@ The MVP is complete only when all of the following are satisfied:
 - [ ] The responder agent summarizes an alert with operational impact and next steps.
 - [ ] Docker Compose runs the local stack successfully.
 - [ ] Automated tests pass through a single documented command.
-- [ ] GitHub Actions enforces CI gates for pull requests and deployment checks.
+- [ ] GitHub Actions runs backend/frontend checks and builds both containers for pull requests to `main`; Render deploys `main` only after CI checks pass.
 - [ ] The application is deployable and the release process is documented.
 
 ## 2. Assessment rubric mapping
