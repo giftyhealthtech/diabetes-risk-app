@@ -6,6 +6,8 @@ React application for the educational diabetes-risk classification app.
 
 To run the frontend and backend together in containers, follow the root [Docker Compose instructions](../README.md#run-the-full-app-with-docker-compose).
 
+For public deployment, see the root [Render Blueprint instructions](../README.md#public-deployment-on-render).
+
 From this directory:
 
 ```sh

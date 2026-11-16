@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: diabetes-risk-app-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    autoDeployTrigger: commit
+    envVars:
+      - key: APP_NAME
+        value: diabetes-risk-app
+      - key: APP_VERSION
+        value: 0.1.0
+      - key: ENVIRONMENT
+        value: production
+      - key: MODEL_API_URL
+        value: https://diabetes-risk-prediction-tmkn.onrender.com
+      - key: MODEL_API_TIMEOUT
+        value: "10.0"
+      - key: CORS_ORIGINS
+        value: https://diabetes-risk-app-web.onrender.com
+
+  - type: web
+    name: diabetes-risk-app-web
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    autoDeployTrigger: commit
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: https://diabetes-risk-app-api.onrender.com
