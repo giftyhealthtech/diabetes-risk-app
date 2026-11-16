@@ -18,7 +18,7 @@ The MVP is complete only when all of the following are satisfied:
 - [ ] OpenTelemetry traces cover FastAPI requests and outbound prediction API calls and can be exported through OTLP/HTTP.
 - [ ] Grafana dashboards display the correct monitoring views.
 - [ ] Alert rules can detect service degradation and availability issues.
-- [ ] The responder agent summarizes an alert with operational impact and next steps.
+- [ ] The manually invoked responder agent summarizes supplied, redacted alert evidence, assesses impact, and proposes a minimal fix for explicit human approval; it cannot change production.
 - [ ] Docker Compose runs the local stack successfully.
 - [ ] Automated tests pass through a single documented command.
 - [ ] GitHub Actions runs backend/frontend checks and builds both containers for pull requests to `main`; Render deploys `main` only after CI checks pass.

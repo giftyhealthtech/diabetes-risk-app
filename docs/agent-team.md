@@ -51,13 +51,14 @@ Responsibilities:
 
 ## 6. On-Call Responder Agent
 Responsibilities:
-- Receive monitoring alerts.
-- Inspect available telemetry.
-- Summarize incidents.
-- Identify likely causes.
-- Execute approved, predefined, reversible remediation actions.
-- Verify whether remediation worked.
-- Escalate unresolved or risky incidents.
+- Manually investigate alert context supplied by the project lead using repository code and redacted telemetry.
+- Summarize verified evidence, likely operational impact, confidence, and missing information.
+- Propose a minimal, reversible code fix and wait for explicit approval before editing the workspace.
+- Make approved workspace changes only; request human validation through the normal tests and protected CI/CD workflow.
+- Never access or modify production, deploy, roll back, commit, push, or perform automatic remediation.
+- Escalate unresolved causes, sensitive-data exposure, and any production-affecting action to the project lead.
+
+The workspace agent is defined in `.github/agents/on-call-responder.agent.md`. It is manually invoked; no Alertmanager, Grafana, or Render alert delivery integration is configured.
 
 ## Agent Collaboration Process
 

@@ -34,9 +34,9 @@ The Render Blueprint uses `autoDeployTrigger: checksPass`. For services created 
 
 ## On-Call Workflow
 
-1. Monitoring detects an alert condition.
-2. Alert is delivered to the responder agent.
-3. Agent inspects logs, metrics, and traces.
-4. Agent summarizes the incident.
-5. Agent performs only predefined safe remediation actions.
-6. Agent verifies recovery or escalates to the human project lead.
+1. Monitoring detects an alert condition; automatic delivery to the responder is not configured.
+2. The project lead manually invokes the workspace **On-call Responder** agent with the alert and redacted metrics/logs/trace context.
+3. The agent inspects supplied evidence and repository code, then reports findings, impact, confidence, and a proposed fix.
+4. The agent waits for explicit project-lead approval before editing local workspace files.
+5. The project lead reviews and validates any changes through tests and the normal protected CI/CD workflow.
+6. Only the project lead approves and performs production changes or deployment; unresolved or risky incidents are escalated to the project lead.

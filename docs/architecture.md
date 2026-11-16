@@ -19,7 +19,7 @@ The app remains a full-stack system with a React frontend, a FastAPI backend, th
 3. The FastAPI backend validates payloads again and checks the external model contract before forwarding requests.
 4. The backend sends a request to the external diabetes-risk prediction API only if the payload is valid under the current contract.
 5. The model returns a prediction response that the backend preserves and relays to the frontend.
-6. Prometheus collects backend metrics; Grafana reads them; alert rules trigger the responder workflow.
+6. Prometheus collects backend metrics and Grafana displays them. Alert rules can identify conditions; the initial responder is manually invoked with the alert and redacted telemetry because automatic alert delivery is not configured.
 
 ## 3. BMI handling policy
 
@@ -68,7 +68,8 @@ The project retains the existing 12 GitHub issues and updates them rather than c
 - Dependency: Issues 6 and 7.
 
 ### Issue 9 — Implement responder agent summarization
-- Add the on-call responder workflow that summarizes an alert and suggests likely impact.
+- Add a manually invoked responder agent that summarizes supplied alert evidence and proposes reviewable code fixes only after explicit human approval.
+- Do not allow production access, deployment, rollback, or automatic remediation.
 - Dependency: Issue 8.
 
 ### Issue 10 — Add GitHub Actions CI and deployment checks

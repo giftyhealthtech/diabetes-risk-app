@@ -9,7 +9,7 @@ Diabetes Risk App
 
 The Diabetes Risk App is a web application that allows users to submit selected demographic, health, and lifestyle information through a user-friendly interface and receive a machine learning classification from the existing Diabetes Prediction API developed in the diabetes-risk-prediction repository.
 
-The application will also demonstrate backend integration, frontend development, containerization, automated testing, application monitoring, alerting, and automated incident response.
+The application will also demonstrate backend integration, frontend development, containerization, automated testing, application monitoring, alerting, and human-reviewed incident response.
 
 ### 1.3 Project Objectives
 
@@ -55,7 +55,7 @@ The application will contain the following components:
 4. **Prometheus:** Collects application metrics.
 5. **Grafana:** Displays monitoring dashboards.
 6. **Alerting System:** Detects defined application and service failures.
-7. **Responder Agent:** Receives alerts and generates concise incident summaries.
+7. **Responder Agent:** Manually investigates supplied alert context and generates concise incident summaries and reviewable fix proposals.
 8. **Docker Compose:** Runs the application services together.
 9. **GitHub Actions:** Runs automated tests and deployment workflows.
 
@@ -63,7 +63,7 @@ The application will contain the following components:
 
 React Frontend → FastAPI Backend → diabetes risk prediction API → FastAPI Backend → React Frontend.
 
-Prometheus independently collects metrics from the backend, while Grafana displays them and alerting rules trigger the responder agent.
+Prometheus independently collects metrics from the backend, while Grafana displays them and alerting rules detect service conditions. The initial responder is manually invoked with an alert; automatic alert delivery is not configured.
 
 ## 4. Functional Requirements
 
@@ -150,13 +150,15 @@ Prometheus alert rules must detect configured conditions such as:
 
 The responder agent must:
 
-- Receive monitoring alerts.
+- Accept monitoring alerts and redacted telemetry supplied by the project lead. Automatic alert delivery is not part of the initial responder configuration.
 - Identify the affected service.
-- Summarize the alert.
+- Summarize verified evidence, likely impact, confidence, and missing information.
 - Explain the likely operational impact.
-- Suggest relevant investigation steps.
+- Suggest relevant investigation steps and a minimal, reversible code fix.
+- Wait for explicit human approval before making local workspace changes.
+- Never access or modify production, deploy, roll back, or automatically remediate an incident.
 
-The initial responder will be advisory only and must not execute deployments, modify production services, or perform automatic rollbacks.
+The responder is advisory and human-in-the-loop. Approved code changes must be reviewed, tested, and deployed through the normal protected CI/CD workflow.
 
 ### FR9: Automated Testing
 
@@ -243,7 +245,7 @@ The MVP will be considered complete when:
 - [ ] Prometheus successfully collects backend metrics.
 - [ ] Grafana displays the monitoring metrics.
 - [ ] Configured alert rules trigger when their conditions are met.
-- [ ] The responder agent can summarize an incoming alert.
+- [ ] The manually invoked responder agent can summarize a supplied, redacted alert and propose a local fix for human approval without changing production.
 - [ ] Docker Compose can run the application services.
 - [ ] Automated tests pass.
 - [ ] GitHub Actions successfully runs the CI workflow.

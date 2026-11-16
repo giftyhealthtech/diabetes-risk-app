@@ -29,6 +29,12 @@ Backend application and Uvicorn logs are JSON lines with timestamps and trace/sp
 
 Incoming requests and outbound HTTPX calls are instrumented with OpenTelemetry. Trace context is accepted and propagated using W3C `traceparent`/`tracestate`; spans intentionally omit request URLs, query strings, headers, and bodies. To export traces to an OTLP/HTTP collector, set `OTEL_EXPORTER_OTLP_ENDPOINT` in `.env` to the collector's base URL (for example `http://localhost:4318`) before starting Compose. The exporter sends traces to `/v1/traces`; the app creates trace IDs locally even when no collector endpoint is configured, but traces will not be available in a tracing UI until an exporter/collector is configured. For Render, configure the same variable in the backend service's environment settings. Do not put credentials in the endpoint URL; use the standard `OTEL_EXPORTER_OTLP_HEADERS` environment variable for collector authentication where required.
 
+## On-call responder
+
+The workspace custom agent is defined in `.github/agents/on-call-responder.agent.md`. Invoke **On-call Responder** from VS Code Chat and provide the alert name, affected service, time window, and redacted metrics/log excerpts or trace ID. Do not include prediction inputs, health information, secrets, or authorization headers.
+
+The agent investigates supplied evidence and proposes a minimal code fix. It must wait for your explicit approval before editing files. After approval, changes remain in the workspace for your review and validation; the agent has no production, deployment, commit, push, or command-execution access. No automatic Prometheus Alertmanager, Grafana, or Render alert delivery is configured yet.
+
 ## Public deployment on Render
 
 The root [`render.yaml`](render.yaml) Blueprint defines a React Static Site and a Docker-based FastAPI Web Service. The current public URLs are:
