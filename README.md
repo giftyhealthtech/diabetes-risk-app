@@ -2,6 +2,8 @@
 
 Educational web application for classifying self-reported diabetes status. It is not a medical diagnostic tool and does not predict future diabetes development.
 
+Try the live application: [https://diabetes-risk-app-z8ke.onrender.com/](https://diabetes-risk-app-z8ke.onrender.com/)
+
 ## Run the full app with Docker Compose
 
 Requirements: Docker Engine with the Compose plugin.

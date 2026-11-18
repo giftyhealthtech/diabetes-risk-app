@@ -25,4 +25,4 @@ npm run lint
 npm run build
 ```
 
-The model API OpenAPI schema exposes the prediction fields as numeric values but does not publish most categorical value lists. The live API reports smoking-status codes `1`, `2`, `3`, and `4`; the interface offers only those verified choices and leaves the other fields numeric rather than defining unsupported dropdown options. BMI is required: users can enter it directly or provide height in metres and weight in kilograms for calculation. Inputs are sent only to this app's FastAPI backend.
+The form displays human-readable age, sex, general-health, exercise, smoking, and drinking choices without numeric prefixes. It preserves the corresponding survey encodings in form state and translates sex, exercise, heavy drinking, and heart disease to the binary values expected by the live prediction API: female/yes = `1`, male/no = `0`. Diabetes status is the model output, not a user input. BMI can be entered directly, calculated from height and weight, or omitted. Inputs are sent only to this app's FastAPI backend.
