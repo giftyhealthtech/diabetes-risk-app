@@ -52,7 +52,7 @@ Important:
 The frontend must support:
 1. Height and weight input with automatic BMI calculation.
 2. Direct BMI input.
-3. Leaving BMI unavailable only as an application-level UX option when the external model API contract still requires a value.
+3. Allowing BMI to be unavailable because the verified deployed model API accepts requests with BMI omitted or null.
 
 BMI formula:
 
@@ -60,7 +60,7 @@ BMI = weight in kilograms / (height in metres × height in metres)
 
 The backend must validate the supplied values.
 
-Do not send missing BMI to the diabetes risk prediction API until its API contract explicitly supports nullable BMI and its existing fitted preprocessing pipeline includes the intended median imputation for the missing value.
+When BMI is unavailable, omit the `bmi` field from the request to the diabetes risk prediction API. Do not calculate a replacement median in this application.
 
 Never calculate a new median from an individual request or from the frontend.
 

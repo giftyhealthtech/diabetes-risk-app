@@ -47,11 +47,29 @@ export async function submitPrediction(payload) {
     )
   }
 
+  const isLegacyResponse =
+    result !== null &&
+    typeof result === 'object' &&
+    (Object.hasOwn(result, 'Diabetes') || Object.hasOwn(result, 'prediction')) &&
+    typeof result.probability === 'number' &&
+    Number.isFinite(result.probability)
+  const isCurrentResponse =
+    result !== null &&
+    typeof result === 'object' &&
+    typeof result.diabetes_status === 'string' &&
+    typeof result.chance_of_diabetes === 'string' &&
+    /^\d+(?:\.\d+)?%$/.test(result.chance_of_diabetes)
+  const optionalTextFields = ['message', 'explanation', 'disclaimer']
+  const hasInvalidOptionalField =
+    result !== null &&
+    typeof result === 'object' &&
+    optionalTextFields.some(
+      (field) => result[field] !== undefined && typeof result[field] !== 'string',
+    )
+
   if (
-    result === null ||
-    typeof result !== 'object' ||
-    (!Object.hasOwn(result, 'Diabetes') && !Object.hasOwn(result, 'prediction')) ||
-    !Object.hasOwn(result, 'probability')
+    (!isLegacyResponse && !isCurrentResponse) ||
+    hasInvalidOptionalField
   ) {
     throw new PredictionRequestError(
       'The prediction service returned an unexpected response. Please try again later.',

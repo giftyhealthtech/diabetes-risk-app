@@ -7,10 +7,16 @@ client = TestClient(app)
 
 
 def test_predict_endpoint_forwards_valid_prediction(monkeypatch):
+    prediction_result = {
+        "diabetes_status": "You may not be at high risk of diabetes.",
+        "chance_of_diabetes": "1.55%",
+        "explanation": "Only about 1.55% of people with answers like yours reported having diabetes, which is low.",
+    }
+
     def fake_post(url, json, timeout):
         assert url.endswith("/predict")
         assert json["bmi"] == 20.0
-        return httpx.Response(200, json={"prediction": 1, "probability": 0.4})
+        return httpx.Response(200, json=prediction_result)
 
     monkeypatch.setattr("backend.app.services.prediction_service.httpx.post", fake_post)
 
@@ -29,7 +35,7 @@ def test_predict_endpoint_forwards_valid_prediction(monkeypatch):
     response = client.post("/predict", json=payload)
 
     assert response.status_code == 200
-    assert response.json() == {"prediction": 1, "probability": 0.4}
+    assert response.json() == prediction_result
 
 
 def test_predict_endpoint_returns_meaningful_error_when_upstream_fails(monkeypatch):

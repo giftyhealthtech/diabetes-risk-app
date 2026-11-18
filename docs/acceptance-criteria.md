@@ -7,7 +7,7 @@ The MVP is complete only when all of the following are satisfied:
 - [ ] The React frontend is accessible and usable.
 - [ ] The user can submit valid prediction inputs.
 - [ ] BMI can be calculated from height and weight or entered directly.
-- [ ] The app does not send missing BMI to the diabetes-risk prediction API until the external API supports nullable BMI and continues to use the model’s existing fitted median imputer.
+- [ ] When BMI is unavailable, the backend omits it from the upstream request; the verified model API accepts the request.
 - [ ] Invalid inputs are rejected with clear feedback.
 - [ ] The backend validates requests before sending them to the model API.
 - [ ] The backend successfully communicates with the deployed diabetes-risk prediction API.

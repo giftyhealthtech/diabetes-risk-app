@@ -6,7 +6,7 @@ The project plan retains the original assessment scope but updates the BMI decis
 
 - The app still integrates with the external diabetes-risk prediction API without changing the trained model.
 - BMI can be derived from height and weight or entered directly.
-- Missing BMI is not sent to the external diabetes-risk prediction API until the API explicitly supports it and continues to rely on its fitted median imputation.
+- The deployed model API contract allows `bmi` to be omitted or null. When BMI is unavailable, the app omits the field and leaves preprocessing to the model API.
 
 ## 2. System context
 
@@ -27,9 +27,9 @@ The application must support the following BMI workflow:
 
 - Height and weight input to compute BMI automatically.
 - Direct BMI input when the user already knows the value.
-- Missing BMI is not sent to the external model until the external API contract explicitly supports nullable BMI and the model’s median imputation logic remains the authoritative source.
+- BMI is optional under the verified external API contract. When unavailable, omit the field rather than calculating an app-specific replacement.
 
-This preserves the requirement that the application must not compute or replace the model’s own median imputer.
+The application does not compute or replace the model's preprocessing.
 
 ## 5. Issue plan and state
 
@@ -148,8 +148,8 @@ The project retains the existing 12 GitHub issues and updates them rather than c
 
 ## 8. Technical risks and mitigations
 
-### Risk: external BMI contract mismatch
-Mitigation: verify the model API contract before sending any BMI payload. Do not send missing BMI until the service explicitly supports it.
+### Risk: external BMI contract drift
+Mitigation: recheck the deployed model API schema before changing BMI handling; omit BMI when it is unavailable under the currently verified contract.
 
 ### Risk: contract drift in the model API
 Mitigation: maintain a contract verification checkpoint at the start of each milestone and validate request shape in tests.
