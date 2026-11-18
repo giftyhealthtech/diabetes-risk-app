@@ -83,6 +83,8 @@ The frontend must provide fields for:
 
 The input fields must follow the accepted values and validation rules of the diabetes risk prediction API.
 
+The interface must present these categories with human-readable labels and translate survey encodings to the prediction API's accepted values using the model's training preprocessing. Diabetes status is the prediction target and must not be collected as an input.
+
 ### FR2: Input Validation
 
 The backend must:
@@ -92,7 +94,7 @@ The backend must:
 - Validate BMI.
 - Return meaningful validation errors.
 - Prevent invalid requests from reaching the prediction API.
-- Ensure BMI is only sent to the diabetes risk prediction API when the external API contract explicitly supports nullable BMI and the existing fitted median imputer is used.
+- Omit the BMI field when it is unavailable; the verified external API accepts requests without BMI and handles its own preprocessing.
 
 ### FR3: Prediction Integration
 
@@ -237,7 +239,7 @@ The MVP will be considered complete when:
 - [ ] A user can access the React application.
 - [ ] A user can submit valid prediction inputs.
 - [ ] BMI can be calculated from height and weight or entered directly.
-- [ ] Missing BMI is not sent to the diabetes risk prediction API until the external API supports nullable BMI and median imputation remains the model’s responsibility.
+- [ ] When BMI is unavailable, the backend omits the `bmi` field; the verified model API accepts this request and applies its existing preprocessing.
 - [ ] Invalid inputs are rejected with understandable messages.
 - [ ] The backend successfully communicates with the diabetes risk prediction API.
 - [ ] The prediction result is displayed correctly.

@@ -209,7 +209,7 @@ describe('prediction workflow', () => {
     expect(screen.getByRole('button', { name: /calculate my estimate/i })).toBeInTheDocument()
     expect(
       screen.getByRole('heading', {
-        name: 'Complete a short health assessment to explore a survey-based diabetes classification.',
+        name: 'Your result will appear here',
       }),
     ).toBeInTheDocument()
     expect(screen.getByText('YOUR ASSESSMENT')).toHaveClass('assessment-eyebrow')
