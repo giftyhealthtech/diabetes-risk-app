@@ -8,6 +8,14 @@ export class PredictionRequestError extends Error {
   }
 }
 
+export async function warmPredictionService() {
+  try {
+    await fetch(`${apiBaseUrl}/health`)
+  } catch {
+    return
+  }
+}
+
 export async function submitPrediction(payload) {
   let response
   try {

@@ -28,7 +28,7 @@ Use pull requests for merging changes.
 1. Pull requests targeting `main` run backend tests, frontend lint/tests/build, and Docker image builds through GitHub Actions.
 2. Protect `main` with required CI checks and review approval; only approved, passing changes may merge.
 3. Render deploys changes from its linked `main` branch after all CI checks pass.
-4. The backend `/health` endpoint verifies backend service health after deployment.
+4. The backend `/health/live` endpoint verifies backend process health after deployment. The `/health` endpoint also checks the upstream model API and can take up to two minutes while it wakes.
 
 The Render Blueprint uses `autoDeployTrigger: checksPass`. For services created manually, set **After CI Checks Pass** under **Settings → Auto-Deploy** in the Render Dashboard. Changes to the Blueprint do not automatically update manually managed service settings.
 

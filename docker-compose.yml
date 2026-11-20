@@ -10,7 +10,7 @@ services:
       BACKEND_HOST: 0.0.0.0
       BACKEND_PORT: 8000
       MODEL_API_URL: ${MODEL_API_URL:-https://diabetes-risk-prediction-tmkn.onrender.com}
-      MODEL_API_TIMEOUT: ${MODEL_API_TIMEOUT:-10.0}
+      MODEL_API_TIMEOUT: ${MODEL_API_TIMEOUT:-120.0}
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000,http://127.0.0.1:3000}
       OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
       OTEL_EXPORTER_OTLP_HEADERS: ${OTEL_EXPORTER_OTLP_HEADERS:-}
@@ -21,7 +21,7 @@ services:
         - CMD
         - python
         - -c
-        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2)"
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/live', timeout=2)"
       interval: 15s
       timeout: 3s
       retries: 5

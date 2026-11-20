@@ -13,6 +13,18 @@ class PredictionAPIError(RuntimeError):
     """Raised when the external diabetes prediction API is unavailable or returns an error."""
 
 
+def check_prediction_api_health() -> None:
+    url = settings.model_api_url.rstrip("/") + "/health"
+    try:
+        response = httpx.get(url, timeout=settings.model_api_timeout)
+        if not response.is_success:
+            raise PredictionAPIError(
+                f"Prediction API unavailable: HTTP {response.status_code}"
+            )
+    except httpx.HTTPError as exc:
+        raise PredictionAPIError(f"Prediction API unavailable: {exc}") from exc
+
+
 def get_prediction(payload: dict[str, Any]) -> dict[str, Any]:
     url = settings.model_api_url.rstrip("/") + "/predict"
     started_at = time.perf_counter()

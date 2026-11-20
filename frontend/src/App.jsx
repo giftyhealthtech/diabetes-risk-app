@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { submitPrediction } from './api.js'
+import React, { useEffect, useState } from 'react'
+import { submitPrediction, warmPredictionService } from './api.js'
 import './App.css'
 
 const initialValues = {
@@ -157,6 +157,10 @@ function App() {
   const [result, setResult] = useState(null)
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+
+  useEffect(() => {
+    void warmPredictionService()
+  }, [])
 
   const updateValue = (event) => {
     const { name, value } = event.target

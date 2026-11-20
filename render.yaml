@@ -5,7 +5,7 @@ services:
     plan: free
     dockerfilePath: ./backend/Dockerfile
     dockerContext: .
-    healthCheckPath: /health
+    healthCheckPath: /health/live
     autoDeployTrigger: checksPass
     envVars:
       - key: APP_NAME
@@ -17,7 +17,7 @@ services:
       - key: MODEL_API_URL
         value: https://diabetes-risk-prediction-tmkn.onrender.com
       - key: MODEL_API_TIMEOUT
-        value: "10.0"
+        value: "120.0"
       - key: CORS_ORIGINS
         value: https://diabetes-risk-app-z8ke.onrender.com
 

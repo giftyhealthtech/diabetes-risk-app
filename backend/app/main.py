@@ -9,7 +9,11 @@ from .observability import (
     instrument_app,
 )
 from .schemas import PredictionInput
-from .services.prediction_service import PredictionAPIError, get_prediction
+from .services.prediction_service import (
+    PredictionAPIError,
+    check_prediction_api_health,
+    get_prediction,
+)
 
 configure_logging()
 
@@ -37,8 +41,22 @@ add_metrics_endpoint(app)
 instrument_app(app)
 
 
+@app.get("/health/live")
+def liveness_check() -> dict[str, str]:
+    return {
+        "status": "ok",
+        "service": settings.app_name,
+        "environment": settings.environment,
+    }
+
+
 @app.get("/health")
-async def health_check() -> dict[str, str]:
+def health_check() -> dict[str, str]:
+    try:
+        check_prediction_api_health()
+    except PredictionAPIError as exc:
+        raise HTTPException(status_code=503, detail="Prediction API unavailable") from exc
+
     return {
         "status": "ok",
         "service": settings.app_name,
