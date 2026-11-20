@@ -44,7 +44,8 @@ describe('prediction workflow', () => {
 
     await user.click(screen.getByRole('button', { name: /calculate my estimate/i }))
     expect(screen.getByLabelText('Age group')).toBeInvalid()
-    expect(fetch).not.toHaveBeenCalled()
+    expect(fetch).toHaveBeenCalledWith('/api/health')
+    expect(fetch.mock.calls.some(([url]) => url === '/api/predict')).toBe(false)
 
     await fillCommonFields(user)
     expect(screen.queryByLabelText('Height (m)')).not.toBeInTheDocument()
@@ -230,6 +231,15 @@ describe('prediction workflow', () => {
     ).toBeInTheDocument()
     expect(screen.queryByRole('option', { name: /^\d+ —/ })).not.toBeInTheDocument()
     expect(screen.queryByLabelText('Diabetes status')).not.toBeInTheDocument()
+  })
+
+  it('silently pings the backend health endpoint when the app opens', async () => {
+    fetch.mockRejectedValue(new Error('backend unavailable'))
+
+    render(<App />)
+
+    expect(fetch).toHaveBeenCalledWith('/api/health')
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
 
   it('maps the displayed binary choices to the values expected by the prediction API', async () => {

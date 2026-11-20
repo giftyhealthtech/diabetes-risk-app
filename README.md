@@ -13,9 +13,9 @@ cp .env.example .env
 docker compose up --build
 ```
 
-Open [http://localhost:3000](http://localhost:3000). The frontend serves the React app and proxies prediction requests to the FastAPI backend. The backend is also available at [http://localhost:8000](http://localhost:8000), with its health endpoint at `/health`.
+Open [http://localhost:3000](http://localhost:3000). The frontend serves the React app and proxies prediction requests to the FastAPI backend. On page load, it also pings the backend `/health` endpoint, which checks the model API and can take up to two minutes while Render wakes the model. The backend is also available at [http://localhost:8000](http://localhost:8000); `/health/live` checks only that the backend process is responsive.
 
-Compose waits for the backend health check before starting the frontend. Set `FRONTEND_PORT` or `BACKEND_PORT` in `.env` to change the host ports, and `MODEL_API_URL` or `MODEL_API_TIMEOUT` to configure the upstream model request. The backend must be able to reach the configured model API.
+Compose waits for the backend liveness check before starting the frontend. Set `FRONTEND_PORT` or `BACKEND_PORT` in `.env` to change the host ports, and `MODEL_API_URL` or `MODEL_API_TIMEOUT` to configure the upstream model request. The timeout defaults to 120 seconds to allow the model API to start from a cold state.
 
 Stop the services with:
 
@@ -49,7 +49,7 @@ The Blueprint selects Render's free backend plan to avoid introducing hosting ch
 1. Push the repository to GitHub.
 2. In Render, choose **New → Blueprint**, connect this repository, and select the `main` branch.
 3. Review the two services and deploy the Blueprint.
-4. Once deployment finishes, verify the backend at `https://diabetes-risk-app-api.onrender.com/health` and open the frontend at `https://diabetes-risk-app-z8ke.onrender.com`.
+4. Once deployment finishes, open the frontend at `https://diabetes-risk-app-z8ke.onrender.com`; its initial `/health` ping wakes the model API. The backend `/health/live` endpoint checks backend availability without waiting for the model.
 5. Submit a synthetic test request through the frontend to confirm the browser-to-backend-to-model API flow.
 
 The Blueprint configures the frontend API URL and backend CORS origin to match the current service URLs above. If Render reports either name is unavailable or assigns a different service URL, update `VITE_API_BASE_URL` on the static site and `CORS_ORIGINS` on the backend to the actual URLs, then redeploy. For an already deployed backend that is not managed by the Blueprint, update `CORS_ORIGINS` in its Render Dashboard environment settings to `https://diabetes-risk-app-z8ke.onrender.com` and redeploy the backend. The backend image listens on Render's `PORT` environment variable; Docker Compose uses port 8000 locally.

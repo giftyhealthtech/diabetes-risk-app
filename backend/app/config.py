@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     backend_host: str = "0.0.0.0"
     backend_port: int = 8000
     model_api_url: str = "https://diabetes-risk-prediction-tmkn.onrender.com"
-    model_api_timeout: float = 10.0
+    model_api_timeout: float = 120.0
     cors_origins: Annotated[list[str], NoDecode] = Field(
         default_factory=lambda: ["http://localhost:3000", "http://127.0.0.1:3000"]
     )

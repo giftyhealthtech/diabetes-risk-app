@@ -80,9 +80,15 @@ def test_metrics_endpoint_exposes_http_and_prediction_api_metrics(monkeypatch) -
     assert "prediction_api_request_duration_seconds" in metrics_response.text
 
 
-def test_request_logs_include_trace_context_without_query_or_health_data(caplog) -> None:
+def test_request_logs_include_trace_context_without_query_or_health_data(
+    caplog, monkeypatch
+) -> None:
     exporter = InMemorySpanExporter()
     tracer_provider.add_span_processor(SimpleSpanProcessor(exporter))
+    monkeypatch.setattr(
+        "backend.app.services.prediction_service.httpx.get",
+        lambda url, timeout: httpx.Response(200),
+    )
 
     with caplog.at_level(logging.INFO, logger="backend.http"):
         response = client.get("/health?bmi=33.2&secret=not-for-logs")
