@@ -10,7 +10,7 @@ client = TestClient(app)
 def test_health_endpoint_returns_ok(monkeypatch) -> None:
     def fake_get(url, timeout):
         assert url == f"{settings.model_api_url.rstrip('/')}/health"
-        assert timeout == settings.model_api_timeout
+        assert timeout == 15
         return httpx.Response(200)
 
     monkeypatch.setattr("backend.app.services.prediction_service.httpx.get", fake_get)
