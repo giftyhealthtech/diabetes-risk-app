@@ -8,13 +8,21 @@ export class PredictionRequestError extends Error {
   }
 }
 
+
 export async function warmPredictionService() {
   try {
-    await fetch(`${apiBaseUrl}/health`)
-  } catch {
-    return
+    const response = await fetch(`${apiBaseUrl}/warmup`, {
+      method: 'POST',
+    })
+
+    if (!response.ok) {
+      console.error('Could not start model warm-up')
+    }
+  } catch (error) {
+    console.error('Model warm-up request failed:', error)
   }
 }
+
 
 export async function submitPrediction(payload) {
   let response

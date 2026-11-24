@@ -35,7 +35,7 @@ function responseWith(body, status = 200) {
 
 describe('prediction workflow', () => {
   beforeEach(() => {
-    vi.stubGlobal('fetch', vi.fn())
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(responseWith({}, 200)))
   })
 
   it('requires valid health information and sends calculated BMI inputs to the backend', async () => {
@@ -44,7 +44,7 @@ describe('prediction workflow', () => {
 
     await user.click(screen.getByRole('button', { name: /calculate my estimate/i }))
     expect(screen.getByLabelText('Age group')).toBeInvalid()
-    expect(fetch).toHaveBeenCalledWith('/api/health')
+    expect(fetch).toHaveBeenCalledWith('/api/warmup', { method: 'POST' })
     expect(fetch.mock.calls.some(([url]) => url === '/api/predict')).toBe(false)
 
     await fillCommonFields(user)
@@ -233,12 +233,12 @@ describe('prediction workflow', () => {
     expect(screen.queryByLabelText('Diabetes status')).not.toBeInTheDocument()
   })
 
-  it('silently pings the backend health endpoint when the app opens', async () => {
+  it('starts model warm-up when the app opens without surfacing errors', async () => {
     fetch.mockRejectedValue(new Error('backend unavailable'))
 
     render(<App />)
 
-    expect(fetch).toHaveBeenCalledWith('/api/health')
+    expect(fetch).toHaveBeenCalledWith('/api/warmup', { method: 'POST' })
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
 

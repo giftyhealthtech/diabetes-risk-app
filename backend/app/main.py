@@ -13,6 +13,8 @@ from .services.prediction_service import (
     PredictionAPIError,
     check_prediction_api_health,
     get_prediction,
+    start_model_warmup,
+    is_model_ready,
 )
 
 configure_logging()
@@ -47,6 +49,27 @@ def liveness_check() -> dict[str, str]:
         "status": "ok",
         "service": settings.app_name,
         "environment": settings.environment,
+    }
+
+
+@app.post("/warmup")
+def warmup_model() -> dict[str, str]:
+    """Start waking up the external model API in the background."""
+
+    start_model_warmup(force=True)
+
+    return {
+        "status": "warming",
+        "message": "Model warm-up started.",
+    }
+
+
+@app.get("/warmup/status")
+def warmup_status() -> dict[str, str]:
+    """Check whether the model is ready."""
+
+    return {
+        "status": "ready" if is_model_ready() else "warming",
     }
 
 
