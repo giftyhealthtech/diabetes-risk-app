@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { submitPrediction, warmPredictionService } from './api.js'
+import { submitPrediction, warmPredictionService, waitUntilModelReady } from './api.js'
 import './App.css'
 
 const initialValues = {
@@ -180,6 +180,11 @@ function App() {
     setIsLoading(true)
 
     try {
+      const ready = await waitUntilModelReady()
+      if (!ready) {
+        setError('The prediction service is taking too long. Please try again.')
+        return
+      }
       const prediction = await submitPrediction(buildPredictionPayload(values, bmiMode))
       setResult(prediction)
     } catch (requestError) {
@@ -361,7 +366,7 @@ function App() {
                 {isLoading ? (
                   <>
                     <span className="spinner" aria-hidden="true" />
-                    Requesting result…
+                    Preparing the model, this can take a minute…
                   </>
                 ) : (
                   <>Calculate my estimate <span aria-hidden="true">→</span></>

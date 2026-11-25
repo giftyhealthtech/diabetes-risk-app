@@ -33,9 +33,28 @@ function responseWith(body, status = 200) {
   }
 }
 
+function mockPredictionResponse(body, status = 200) {
+  fetch.mockImplementation((url) => {
+    if (url === '/api/warmup/status') {
+      return Promise.resolve(responseWith({ status: 'ready' }))
+    }
+    if (url === '/api/warmup') {
+      return Promise.resolve(responseWith({}))
+    }
+    return Promise.resolve(responseWith(body, status))
+  })
+}
+
 describe('prediction workflow', () => {
   beforeEach(() => {
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(responseWith({}, 200)))
+    vi.stubGlobal(
+      'fetch',
+      vi.fn((url) =>
+        Promise.resolve(
+          responseWith(url === '/api/warmup/status' ? { status: 'ready' } : {}),
+        ),
+      ),
+    )
   })
 
   it('requires valid health information and sends calculated BMI inputs to the backend', async () => {
@@ -54,14 +73,12 @@ describe('prediction workflow', () => {
     await user.type(screen.getByLabelText('Weight (kg)'), '72')
     expect(screen.getByText('22.2')).toBeInTheDocument()
 
-    fetch.mockResolvedValue(
-      responseWith({
-        Diabetes: 0,
-        probability: 0.0183,
-        probability_percentage: '1.83%',
-        message: 'A sample model explanation.',
-      }),
-    )
+    mockPredictionResponse({
+      Diabetes: 0,
+      probability: 0.0183,
+      probability_percentage: '1.83%',
+      message: 'A sample model explanation.',
+    })
     await user.click(screen.getByRole('button', { name: /calculate my estimate/i }))
 
     await waitFor(() => {
@@ -96,11 +113,17 @@ describe('prediction workflow', () => {
   it('accepts direct BMI and shows the loading state while the backend responds', async () => {
     const user = userEvent.setup()
     let resolveResponse
-    fetch.mockReturnValue(
-      new Promise((resolve) => {
+    fetch.mockImplementation((url) => {
+      if (url === '/api/warmup/status') {
+        return Promise.resolve(responseWith({ status: 'ready' }))
+      }
+      if (url === '/api/warmup') {
+        return Promise.resolve(responseWith({}))
+      }
+      return new Promise((resolve) => {
         resolveResponse = resolve
-      }),
-    )
+      })
+    })
     render(<App />)
 
     await fillCommonFields(user)
@@ -108,8 +131,9 @@ describe('prediction workflow', () => {
     await user.type(screen.getByLabelText('BMI'), '24.5')
     await user.click(screen.getByRole('button', { name: /calculate my estimate/i }))
 
-    expect(screen.getByRole('button', { name: /requesting result/i })).toBeDisabled()
+    expect(screen.getByRole('button', { name: /preparing the model/i })).toBeDisabled()
     expect(screen.getByRole('status')).toHaveTextContent('Contacting the prediction service')
+    expect(fetch).toHaveBeenCalledWith('/api/warmup/status')
     expect(fetch).toHaveBeenCalledWith(
       '/api/predict',
       expect.objectContaining({
@@ -132,18 +156,16 @@ describe('prediction workflow', () => {
 
   it('submits without BMI and renders the current model API response', async () => {
     const user = userEvent.setup()
-    fetch.mockResolvedValue(
-      responseWith({
-        diabetes_status:
-          'You may not be at high risk of diabetes, as your answers are not very similar to people who reported diabetes.',
-        chance_of_diabetes: '1.55%',
-        explanation:
-          'Only about 1.55% of people with answers like yours reported having diabetes, which is low.',
-        message:
-          'This does not rule out diabetes. Consider routine blood glucose testing and consult a healthcare professional if you have concerns.',
-        disclaimer: 'This tool is for educational purposes only and is not a medical diagnostic tool.',
-      }),
-    )
+    mockPredictionResponse({
+      diabetes_status:
+        'You may not be at high risk of diabetes, as your answers are not very similar to people who reported diabetes.',
+      chance_of_diabetes: '1.55%',
+      explanation:
+        'Only about 1.55% of people with answers like yours reported having diabetes, which is low.',
+      message:
+        'This does not rule out diabetes. Consider routine blood glucose testing and consult a healthcare professional if you have concerns.',
+      disclaimer: 'This tool is for educational purposes only and is not a medical diagnostic tool.',
+    })
     render(<App />)
 
     await fillCommonFields(user)
@@ -244,7 +266,7 @@ describe('prediction workflow', () => {
 
   it('maps the displayed binary choices to the values expected by the prediction API', async () => {
     const user = userEvent.setup()
-    fetch.mockResolvedValue(responseWith({ prediction: 0, probability: 0.1 }))
+    mockPredictionResponse({ prediction: 0, probability: 0.1 })
     render(<App />)
 
     await user.selectOptions(screen.getByLabelText('Age group'), '2')
@@ -277,7 +299,7 @@ describe('prediction workflow', () => {
 
   it('shows a clear error if the prediction service is unavailable', async () => {
     const user = userEvent.setup()
-    fetch.mockResolvedValue(responseWith({ detail: 'internal service details' }, 502))
+    mockPredictionResponse({ detail: 'internal service details' }, 502)
     render(<App />)
 
     await fillCommonFields(user)

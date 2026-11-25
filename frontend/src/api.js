@@ -23,6 +23,23 @@ export async function warmPredictionService() {
   }
 }
 
+export async function waitUntilModelReady(maxMs = 300000) {
+  await warmPredictionService() // restarts warm-up if the model went back to sleep
+  const deadline = Date.now() + maxMs
+
+  while (Date.now() < deadline) {
+    try {
+      const response = await fetch(`${apiBaseUrl}/warmup/status`)
+      if (response.ok && (await response.json()).status === 'ready') {
+        return true
+      }
+    } catch {
+      // backend may still be waking up, keep trying
+    }
+    await new Promise((resolve) => setTimeout(resolve, 5000))
+  }
+  return false
+}
 
 export async function submitPrediction(payload) {
   let response
