@@ -1,3 +1,4 @@
+import httpx
 import pytest
 from fastapi.testclient import TestClient
 
@@ -23,11 +24,16 @@ def test_prediction_request_rejects_invalid_bmi(payload, expected_message):
 def test_prediction_request_accepts_unavailable_bmi_and_omits_it_upstream(monkeypatch):
     def fake_post(url, json, timeout):
         assert "bmi" not in json
-        return __import__("httpx").Response(
+        return httpx.Response(
             200,
             json={"diabetes_status": "Low likelihood", "chance_of_diabetes": "1.55%"},
+            request=httpx.Request("POST", url),
         )
 
+    monkeypatch.setattr(
+        "backend.app.services.prediction_service.httpx.get",
+        lambda url, timeout: httpx.Response(200, json={"status": "ready"}),
+    )
     monkeypatch.setattr("backend.app.services.prediction_service.httpx.post", fake_post)
     payload = {
         "age_group": 2,
@@ -73,8 +79,16 @@ def test_prediction_request_rejects_unsupported_heart_disease_code(monkeypatch):
 def test_prediction_request_accepts_height_and_weight_and_computes_bmi(monkeypatch):
     def fake_post(url, json, timeout):
         assert json["bmi"] == pytest.approx(22.22222222222222)
-        return __import__("httpx").Response(200, json={"prediction": 0, "probability": 0.25})
+        return httpx.Response(
+            200,
+            json={"prediction": 0, "probability": 0.25},
+            request=httpx.Request("POST", url),
+        )
 
+    monkeypatch.setattr(
+        "backend.app.services.prediction_service.httpx.get",
+        lambda url, timeout: httpx.Response(200, json={"status": "ready"}),
+    )
     monkeypatch.setattr("backend.app.services.prediction_service.httpx.post", fake_post)
 
     payload = {

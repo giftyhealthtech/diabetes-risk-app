@@ -9,6 +9,10 @@ import httpx
 from backend.app.config import settings
 from backend.app.observability import record_prediction_api_request
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class PredictionAPIError(RuntimeError):
     """Raised when the external diabetes prediction API is unavailable."""
@@ -30,7 +34,7 @@ def _warmup_worker() -> None:
         try:
             response = httpx.get(url, timeout=15)
 
-            if response.is_success:
+            if response.is_success and response.json().get("status") == "ready":
                 _model_ready.set()
                 return
 
@@ -64,10 +68,62 @@ def is_model_ready() -> bool:
 
 
 def wait_for_model_ready(timeout: int = 300) -> bool:
-    """Wait until the model API becomes available."""
+    """
+    Keep contacting the model API until the actual ML model is ready.
 
-    start_model_warmup()
-    return _model_ready.wait(timeout=timeout)
+    This works independently of the background thread's readiness event.
+    """
+
+    url = settings.model_api_url.rstrip("/") + "/health"
+    deadline = time.monotonic() + timeout
+    attempt = 0
+
+    while time.monotonic() < deadline:
+        attempt += 1
+
+        try:
+            logger.info(
+                "Checking model readiness. Attempt %s",
+                attempt,
+            )
+
+            response = httpx.get(url, timeout=20)
+
+            if response.is_success:
+                data = response.json()
+
+                if data.get("status") == "ready":
+                    _model_ready.set()
+
+                    logger.info("ML model is ready.")
+                    return True
+
+                logger.info(
+                    "Model API responded but model is not ready: %s",
+                    data,
+                )
+
+            else:
+                logger.warning(
+                    "Model health check returned HTTP %s",
+                    response.status_code,
+                )
+
+                if response.status_code == 404:
+                    raise PredictionAPIError(
+                        "Model API health endpoint was not found."
+                    )
+
+        except httpx.HTTPError:
+            logger.exception(
+                "Could not reach model API. Retrying..."
+            )
+
+        time.sleep(5)
+
+    logger.error("Model did not become ready within %s seconds", timeout)
+
+    return False
 
 
 def check_prediction_api_health() -> None:
@@ -94,11 +150,14 @@ def get_prediction(payload: dict[str, Any]) -> dict[str, Any]:
     outcome = "failure"
 
     try:
-        # Ensure the model is awake before making a prediction.
+        # Wait for the actual ML model, not just the backend event.
         if not wait_for_model_ready(timeout=300):
             raise PredictionAPIError(
-                "Model API did not become ready within 5 minutes."
+                "The prediction model is still unavailable. "
+                "Please try again shortly."
             )
+
+        logger.info("Sending prediction request to model API.")
 
         response = httpx.post(
             url,
@@ -106,10 +165,7 @@ def get_prediction(payload: dict[str, Any]) -> dict[str, Any]:
             timeout=settings.model_api_timeout,
         )
 
-        if response.status_code >= 400:
-            raise PredictionAPIError(
-                f"Prediction API unavailable: HTTP {response.status_code}"
-            )
+        response.raise_for_status()
 
         result = response.json()
         outcome = "success"
@@ -117,6 +173,8 @@ def get_prediction(payload: dict[str, Any]) -> dict[str, Any]:
         return result
 
     except httpx.HTTPError as exc:
+        logger.exception("Prediction request failed.")
+
         raise PredictionAPIError(
             f"Prediction API unavailable: {exc}"
         ) from exc
