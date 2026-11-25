@@ -16,8 +16,16 @@ def test_predict_endpoint_forwards_valid_prediction(monkeypatch):
     def fake_post(url, json, timeout):
         assert url.endswith("/predict")
         assert json["bmi"] == 20.0
-        return httpx.Response(200, json=prediction_result)
+        return httpx.Response(
+            200,
+            json=prediction_result,
+            request=httpx.Request("POST", url),
+        )
 
+    monkeypatch.setattr(
+        "backend.app.services.prediction_service.httpx.get",
+        lambda url, timeout: httpx.Response(200, json={"status": "ready"}),
+    )
     monkeypatch.setattr("backend.app.services.prediction_service.httpx.post", fake_post)
 
     payload = {
@@ -42,6 +50,10 @@ def test_predict_endpoint_returns_meaningful_error_when_upstream_fails(monkeypat
     def fake_post(url, json, timeout):
         raise httpx.RequestError("upstream unavailable")
 
+    monkeypatch.setattr(
+        "backend.app.services.prediction_service.httpx.get",
+        lambda url, timeout: httpx.Response(200, json={"status": "ready"}),
+    )
     monkeypatch.setattr("backend.app.services.prediction_service.httpx.post", fake_post)
 
     payload = {

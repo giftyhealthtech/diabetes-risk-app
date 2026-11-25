@@ -19,6 +19,14 @@ client = TestClient(app)
 
 
 class PredictionAPIHandler(BaseHTTPRequestHandler):
+    def do_GET(self) -> None:
+        body = json.dumps({"status": "ready"}).encode()
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
     def do_POST(self) -> None:
         self.server.received_traceparent = self.headers.get("traceparent")
         body = json.dumps({"prediction": 0, "probability": 0.1}).encode()
@@ -39,21 +47,22 @@ class PredictionAPITestServer(ThreadingHTTPServer):
 def test_metrics_endpoint_exposes_http_and_prediction_api_metrics(monkeypatch) -> None:
     fail_request = False
 
-    class FakeResponse:
-        status_code = 200
-
-        @staticmethod
-        def json() -> dict[str, int | float]:
-            return {"prediction": 0, "probability": 0.1}
-
     def fake_post(url, json, timeout):
         if fail_request:
             raise httpx.RequestError("upstream unavailable")
-        return FakeResponse()
+        return httpx.Response(
+            200,
+            json={"prediction": 0, "probability": 0.1},
+            request=httpx.Request("POST", url),
+        )
 
     monkeypatch.setattr(
         "backend.app.services.prediction_service.httpx.post",
         fake_post,
+    )
+    monkeypatch.setattr(
+        "backend.app.services.prediction_service.httpx.get",
+        lambda url, timeout: httpx.Response(200, json={"status": "ready"}),
     )
     prediction_payload = {
         "age_group": 2,
